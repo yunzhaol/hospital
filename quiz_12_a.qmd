@@ -1,0 +1,73 @@
+---
+title: "quiz_12_a"
+format: pdf
+editor: visual
+---
+
+```{r}
+# Load packages
+library(ggplot2)
+library(modelsummary)
+library(rstanarm)
+```
+
+```{r}
+# Simulation
+set.seed(23)
+death = rpois(n = 100, lambda = 30)
+year = rep(2001:2020, times = 5)
+hosp = rep(c("A","B","C","D","E"), each = 20)
+data = data.frame(year, hosp, death)
+data
+```
+```{r}
+# Tests
+class(hosp) == "character"
+class(year) == "integer"
+min(year) >= 2001
+max(year) <= 2020
+class(death) == "integer"
+nrow(data) == 100
+ncol(data) == 3
+all(colnames(data) == c("year", "hosp", "death"))
+all(data$hosp %in% c("A", "B", "C", "D", "E"))
+all(data$death >= 0)
+is.integer(data$year) || is.numeric(data$year)
+is.integer(data$death)
+all(table(data$hosp) == rep(20, 5))
+all(table(data$year) == rep(5, 20))
+min(data$death) >= 0
+```
+
+```{r}
+# Graphing
+ggplot(data, aes(x = year, y = death, fill = factor(hosp))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_brewer(palette = "Dark2") +  
+  labs(
+    title = "Cancer Mortality in Sydney's Major Hospitals (2001-2020)", 
+    x = "Year", 
+    y = "Deaths", 
+    fill = "Hospital"
+  ) +
+  theme_bw() +  
+  theme(
+    plot.title = element_text(hjust = 0.5), 
+    axis.text.x = element_text(angle = 45, hjust = 1), 
+    legend.position = "bottom" 
+  )
+
+```
+
+```{r}
+# Modelling
+
+model <-
+  glm(
+    death ~ year + factor(hosp),
+    data = data,
+    family = "poisson"
+  )
+summary(model)
+```
+
